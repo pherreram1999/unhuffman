@@ -55,7 +55,7 @@ void insertarNodo(Diccionario ** dic,Diccionario * nuevoNodo){
     nav->sig = nuevoNodo;
 }
 
-Diccionario * cargarDiccionario(char * path,int * maxlen){
+Diccionario * cargarDiccionario(char * path,int * maxlen,int * noElementos){
     FILE * dicFile = fopen(path,"r");
 
     if(dicFile == NULL){
@@ -84,29 +84,29 @@ Diccionario * cargarDiccionario(char * path,int * maxlen){
             *maxlen = nuevoNodo->longitd;
         }
         insertarNodo(&dic,nuevoNodo);
+        (*noElementos)++;
     }
     fclose(dicFile);
     return dic;
 }
 
 int main(int argc,char ** args) {
-    if(argc != 3){
+    if(argc != 4){
         printf("Favor de proporcionar el nombre del comprimido y su diccionario\n");
         exit(1);
     }
     char * filepath = args[1];
-    char * diccionarioPath = args[2];
-
+    char * pathdestino = args[2];
+    char * diccionarioPath = args[3];
 
     int maxlen = 0;
-    Diccionario * dic = cargarDiccionario(diccionarioPath,&maxlen);
+    int noElementos = 0;
+    Diccionario * dic = cargarDiccionario(diccionarioPath,&maxlen,&noElementos);
 
     FILE * compremido = fopen(filepath,"r");
-    int seek = 0;
     int i = 0;
 
 
-    char * pathdestino = "descompresion.txt";
     FILE * destino = fopen(pathdestino,"w");
     fprintf(destino,"");
     fclose(destino);
@@ -118,42 +118,53 @@ int main(int argc,char ** args) {
     }
 
     //imprimirDiccionario(dic);
-
     Diccionario * nav = NULL;
     nav = dic;
-
-    char codigoTmp[100] = "";
+    char * codigoTmp;
     int lastPoint = 0;
-    unsigned long readTimes = 0;
-    unsigned long size = 0;
-
     unsigned long compremidoMaxLen = 0;
     fseek(compremido,0,SEEK_END);
-    compremidoMaxLen = ftell(compremido);
-
+    // se le resta un uno para saber por el EOF
+    compremidoMaxLen = ftell(compremido) - 1;
+    int count;
+   // imprimirDiccionario(dic);
     rewind(compremido);
-    while(lastPoint <= compremidoMaxLen){
-        while(nav->sig != NULL){
+    while(lastPoint < compremidoMaxLen){
+        count = 0;
+        while(nav != NULL){
+            codigoTmp = NULL;
             /**
              * Recibe el puntero del archivo
              * el segundo es el offset, es decir cuanto se va mover
              * el tercero el desde donde los va leer, inicio, donde este, al final
              */
             fseek(compremido,lastPoint,SEEK_SET);
-            size = nav->longitd * sizeof(char);
-            readTimes = fread(codigoTmp,size,1,compremido);
+            // generamos la palabra y volvemos el puntero a su posicion oiringal
+            codigoTmp = (char *) malloc(nav->longitd * sizeof(char));
+            for(i = 0; i < nav->longitd; i++){
+                codigoTmp[i] = (char) fgetc(compremido);
+            }
+            codigoTmp[i] = '\0'; // para delimitar la cadena en caso de memoria residual
             fseek(compremido,lastPoint,SEEK_SET);
-            printf("codigo temp: %s | temp len: %d | nav codigo: %s | len: %d  | puntero: %ld | readed: %ld\n",codigoTmp,strlen(codigoTmp),nav->codigo,nav->longitd,ftell(compremido),readTimes);
             if(strcmp(codigoTmp,nav->codigo) == 0){
-                printf("Iguales => %s :%s\n",codigoTmp,nav->codigo);
+                fprintf(destino,"%c",nav->simbolo);
+                // movemos el puntero en el siguiente posicion
                 lastPoint += nav->longitd;
                 break;
             }
-
+            count++;
             nav = nav->sig;
+        }
+        if(noElementos == count){
+            printf("\n NO fue posible encontrar una concidencia | cursor: %ld :(\n", ftell(compremido));
+            exit(1);
         }
         nav = dic;
     }
+
+    fclose(destino);
+
+    printf("\nDescompresion terminada terminado :D\n");
 
     return 0;
 }

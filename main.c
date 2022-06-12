@@ -164,7 +164,8 @@ int main(int argc,char ** args) {
 
     fclose(destino);
 
-    printf("\nDescompresion terminada terminado :D\n");
+    printf("\nDescompresion terminada :D\n");
+    printf("¯\\_(ツ)_/¯\n");
 
     return 0;
 }

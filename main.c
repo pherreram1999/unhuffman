@@ -125,6 +125,7 @@ int main(int argc,char ** args) {
     char codigoTmp[100] = "";
     int lastPoint = 0;
     unsigned long readTimes = 0;
+    unsigned long size = 0;
 
     unsigned long compremidoMaxLen = 0;
     fseek(compremido,0,SEEK_END);
@@ -138,9 +139,11 @@ int main(int argc,char ** args) {
              * el segundo es el offset, es decir cuanto se va mover
              * el tercero el desde donde los va leer, inicio, donde este, al final
              */
-            readTimes = fread(codigoTmp,(nav->longitd * sizeof(char)),1,compremido);
             fseek(compremido,lastPoint,SEEK_SET);
-            printf("codigo temp: %s | nav codigo: %s | len: %d  | puntero: %ld | readed: %ld\n",codigoTmp,nav->codigo,nav->longitd,ftell(compremido),readTimes);
+            size = nav->longitd * sizeof(char);
+            readTimes = fread(codigoTmp,size,1,compremido);
+            fseek(compremido,lastPoint,SEEK_SET);
+            printf("codigo temp: %s | temp len: %d | nav codigo: %s | len: %d  | puntero: %ld | readed: %ld\n",codigoTmp,strlen(codigoTmp),nav->codigo,nav->longitd,ftell(compremido),readTimes);
             if(strcmp(codigoTmp,nav->codigo) == 0){
                 printf("Iguales => %s :%s\n",codigoTmp,nav->codigo);
                 lastPoint += nav->longitd;
@@ -151,24 +154,6 @@ int main(int argc,char ** args) {
         }
         nav = dic;
     }
-    /*while(seek != -1){
-        while(nav->sig != NULL){
-            fseek(compremido,0,lastPoint);
-            fread(codigoTmp,nav->longitd,1,compremido);
-            printf("codigo temp: %s | nav codigo: %s\n",codigoTmp,nav->codigo);
-            if(strcmp(codigoTmp,nav->codigo) == 0){
-                fprintf(destino,"%c",nav->simbolo);
-                lastPoint += nav->longitd;
-                printf("econtrado => tmp: %s | code: %s \n",codigoTmp,nav->codigo);
-                strcpy(codigoTmp,"");
-                nav = dic;
-            }
-            nav = nav->sig;
-        }
-        nav = dic;
-       // return 1;
-    }*/
 
-    //imprimirDiccionario(dic);
     return 0;
 }

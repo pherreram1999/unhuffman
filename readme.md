@@ -8,7 +8,7 @@ recibe tres parametros
 Ejemplo:
 ```shell
 # ./huffman.exe en windows
-./huffman archivo_compremido.bin archivo_descompremido.txt
+./huffman archivo_compremido.bin archivo_descompremido.txt diccionario.txt
 ```
 Este código de descompresión se base el siguiente repositorio.
 
